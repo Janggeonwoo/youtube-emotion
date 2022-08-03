@@ -55,7 +55,8 @@ def num_re():
             return str 
     return str
   
-
+a = 1
+b = 2
 
 #썸네일 출력
 def get_thumbnail(url):
