@@ -55,8 +55,6 @@ def num_re():
             return str 
     return str
   
-a = 1
-b = 2
 
 #썸네일 출력
 def get_thumbnail(url):
@@ -486,7 +484,7 @@ def detail(senetence, num):
 
     
         
-        texxt1 = open("./data/happy.txt","r",encoding='UTF-8')
+        texxt1 = open("./data/pleasure.txt","r",encoding='UTF-8')
         lists1 = texxt1.readlines()
         result_happy = list_to_str(lists1)
         texxt1.close()
@@ -503,7 +501,7 @@ def detail(senetence, num):
 
         sentence2 =(result_anger,kospacing_text)        
         
-        texxt3 = open("./data/surprised.txt","r",encoding='UTF-8')
+        texxt3 = open("./data/fear.txt","r",encoding='UTF-8')
         lists3 = texxt3.readlines()
         result_surprised = list_to_str(lists3)
         texxt3.close()
@@ -572,7 +570,7 @@ def detail(senetence, num):
 
         def ORDER():
             dict_test = {
-                '감정': ['슬픔', '기쁨', '분노', '놀람'],
+                '감정': ['슬픔', '기쁨', '분노', '공포'],
                 '유사도': [Score, Score1, Score2, Score3],
             }
 

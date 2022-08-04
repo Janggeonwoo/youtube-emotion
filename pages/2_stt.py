@@ -25,8 +25,8 @@ from konlpy.tag import Kkma
 import os
 from pydub import AudioSegment
 
-contain = []  # 긍정 cell
-contain2 = []  # 부정 cell
+contain = []
+contain2 = []
 
 def Analysis(num):
     tokenizer = Tokenizer()
@@ -37,10 +37,10 @@ def Analysis(num):
     stopwords = ['은', '는', '이', '가', '하', '아', '것', '들', '의', '있', '되', '수', '보', '주', '등', '한', '줄', '를', '을', '에', '에게', '께', '한테', '더러', '에서', '에게서',
                  '한테서', '로', '으로', '와', '과', '도', '부터', '도', '만', '이나', '나', '라도', '의', '거의', '겨우', '결국', '그런데', '즉', '참', '챗', '할때', '할뿐', '함께', '해야한다', '휴']
 
-    PATH = '/Users/82102/Desktop/project/yt_cr/backup/'
-    # PATH = './model/'
-    PATH2 = '/Users/82102/Desktop/project/yt_cr/backup/'
-    # PATH2 = './model/'
+    #PATH = '/Users/82102/Desktop/project/yt_cr/backup/'
+    PATH = './model/'
+    #PATH2 = '/Users/82102/Desktop/project/yt_cr/backup/'
+    PATH2 = './model/'
 
     #모델 및 토큰 불러오기
     model = load_model(PATH + 'best_model.h5')
@@ -59,36 +59,41 @@ def Analysis(num):
         
         # 마이크 입력
         if num == 0:
-            if(score > 0.6):
+            if(score > 0.7):
                 st.markdown("<h2 style='text-align: center; '>분석 결과</h2>", unsafe_allow_html=True)
                 streamlit_positive_1()
                 st.success("전체 문장의 분석 결과, 감정 점수 {:.2f}점 으로 강한 긍정의 문장입니다.\n".format(score * 100))
                 st.balloons()
-                detail(0)
-            elif(0.6> score > 0.5):
+                emotion = 1
+                detail(0, emotion)
+            elif(0.7> score > 0.6):
                 st.markdown("<h2 style='text-align: center; '>분석 결과</h2>", unsafe_allow_html=True)
                 streamlit_positive_2()
                 st.success("전체 문장의 분석 결과, 감정 점수 {:.2f}점 으로 긍정적인 문장입니다.\n".format(score * 100))
+                emotion = 1
                 st.balloons()
-                detail(0)
-            elif(0.5> score > 0.4):
+                detail(0, emotion)
+            elif(0.6> score > 0.4):
                 st.markdown("<h2 style='text-align: center; '>분석 결과</h2>", unsafe_allow_html=True)
                 streamlit_neutrality()
                 st.warning("전체 문장의 분석 결과, 감정 점수 {:.2f}점 으로 중립적인 문장입니다.\n".format(score * 100))
                 st.balloons()
-                detail(0)
+                emotion = 3
+                detail(0, emotion)
             elif(0.4> score > 0.3):
                 st.markdown("<h2 style='text-align: center; '>분석 결과</h2>", unsafe_allow_html=True)
                 streamlit_negative_1()
                 st.error("전체 문장의 분석 결과, 감정 점수 {:.2f}점 으로 부정적인 문장입니다.\n".format(score * 100))
                 st.snow()
-                detail(0)
+                emotion = 0
+                detail(0, emotion)
             else:
                 st.markdown("<h2 style='text-align: center; '>분석 결과</h2>", unsafe_allow_html=True)
                 streamlit_negative_2()
                 st.error("전체 문장의 분석 결과, 감정 점수 {:.2f}점 으로 강한 부정의 문장입니다.\n".format(score * 100))
                 st.snow()
-                detail(0)
+                emotion = 0
+                detail(0, emotion)
         
         # 파일 업로드
         if num == 1:
@@ -121,14 +126,15 @@ def Analysis(num):
                 st.error("전체 문장의 분석 결과, 감정 점수 {:.2f}점 으로 강한 부정의 문장입니다.\n".format(score* 100))
                 detail(1)
 
-    # num = 0 이면 실시간 녹음
+    # num = 0 이면 실시간 녹음 or 텍스트
     if num == 0:
         sentiment_predict(user_input, num)
+        
     
     # num = 1 이면 파일 업로드
     if num == 1:
         sentiment_predict(wb_text, num)
-
+        
 
  #리스트 문자열로 변환
 def listToString(str_list):
@@ -138,7 +144,7 @@ def listToString(str_list):
     return result.strip()
 
 
-def detail(num):
+def detail(num, emotion):
     if num == 0:
         text = user_input
         st.info(user_input)
@@ -153,31 +159,13 @@ def detail(num):
     kospacing_text = spacing(new_sent)
 
     
-
-    ###################################################################형태소 분석
-
-    # okt = Okt()
-
-    # example = kospacing_text
-
-    
-    # # stop_words = set(stop_words.split(' '))
-    # word_tokens = okt.morphs(example)
-
-    # st.info(word_tokens)
     
     ######################################################################형태소 + 불용어
     kkma = Kkma()
-    # len(ex_nouns)
     ex_pos = kkma.morphs(kospacing_text) 
 
-    # text_data = [] 
-    # for (text, tclass) in ex_pos : # ('형태소', 'NNG') 
-    #     if tclass == 'NNG' or tclass == 'NNP' or tclass == 'NP' : 
-    #         text_data.append(text)
 
     good_text = " ".join(ex_pos)
-    # st.info(good_text)
 
     ###################################################################
 
@@ -320,21 +308,43 @@ def detail(num):
             sentence2 = sentence.replace("{","").replace("}","").replace("'","")
             return sentence2
         
-        if Score > 0:
-            st.warning("공포와 관련된 단어")
-            st.info(Set_to_String(intersection))
-        if Score2 > 0:
-            st.success("기쁨과 관련된 단어")
-            st.info(Set_to_String(intersection2))
-        if Score3 > 0:
-            st.error("분노와 관련된 단어")
-            st.info(Set_to_String(intersection3))
-        if Score4 > 0:
-            st.success("사랑과 관련된 단어")
-            st.info(Set_to_String(intersection4))
-        if Score6 > 0:
-            st.warning("슬픔과 관련된 단어")
-            st.info(Set_to_String(intersection6))
+        if emotion == 0:
+            if Score > 0:
+                st.warning("공포와 관련된 단어")
+                st.info(Set_to_String(intersection))
+            if Score3 > 0:
+                st.error("분노와 관련된 단어")
+                st.info(Set_to_String(intersection3))
+            if Score6 > 0:
+                st.warning("슬픔과 관련된 단어")
+                st.info(Set_to_String(intersection6))
+
+        if emotion == 1:
+            if Score2 > 0:
+                st.success("기쁨과 관련된 단어")
+                st.info(Set_to_String(intersection2))
+            if Score4 > 0:
+                st.success("사랑과 관련된 단어")
+                st.info(Set_to_String(intersection4))
+                
+        if emotion == 3:
+            if Score2 > 0:
+                st.success("기쁨과 관련된 단어")
+                st.info(Set_to_String(intersection2))
+            if Score4 > 0:
+                st.success("사랑과 관련된 단어")
+                st.info(Set_to_String(intersection4))
+            if Score > 0:
+                st.warning("공포와 관련된 단어")
+                st.info(Set_to_String(intersection))
+            if Score3 > 0:
+                st.error("분노와 관련된 단어")
+                st.info(Set_to_String(intersection3))
+            if Score6 > 0:
+                st.warning("슬픔과 관련된 단어")
+                st.info(Set_to_String(intersection6))
+                
+
 
     ORDER()
     
@@ -454,32 +464,23 @@ def sub(list):
         detail(str(cell))
 
 def file_upload():
-    path = '/Users/82102/Desktop/project/yt_cr/audio/'
+    path = './audio/'
     upload()
     global filename, filepath
     filename = bytes_data
     filepath = path + bytes_data
     STT()
     Analysis(1)
-    # Analysis(text)
-    # sub(contain)
-    # sub(contain2)
-
 
 
 ##############################################################
 
 
-st.markdown("<h1 style='text-align: center; '>테스트 심리 분석</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='text-align: center; '>Speech To Text</h1>", unsafe_allow_html=True)
 
 streamlit_title()
 
 option = st.sidebar.selectbox("선택", ('MIC', 'Upload'))
-
-# with st.form('form', clear_on_submit=True):
-#     st.success("아래에 내용을 입력해주세요")
-#     user_input = st.text_input('')
-#     st.form_submit_button('전송')
 
 if option == 'MIC':
     with st.form('stt', clear_on_submit=True):
